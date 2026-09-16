@@ -1,0 +1,8 @@
+storage/sessions/
+storage/activity.sqlite
+storage/admin-password.local
+storage/duplicate-submissions.log
+.student-test-cookie.txt
+*.log
+instructor-server/database/activity.sqlite
+instructor-server/storage/sessions/sess_*

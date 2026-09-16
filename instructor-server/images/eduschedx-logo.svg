@@ -1,0 +1,43 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">EduSchedX G4A logo</title>
+  <desc id="desc">A geometric G, number four, and A enclosed by six connected scheduling nodes.</desc>
+
+  <defs>
+    <clipPath id="mark">
+      <rect x="0" y="0" width="320" height="320" rx="40"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#mark)">
+    <path d="M160 24 275 91v138L160 296 45 229V91Z"
+          fill="#F7F3E8" stroke="#17321A" stroke-width="8" stroke-linejoin="round"/>
+
+    <path d="M160 24 275 91v70L160 296 45 229V91Z"
+          fill="none" stroke="#FDC530" stroke-width="12" stroke-linejoin="round"/>
+
+    <path d="M145 79c-53 0-91 36-91 84 0 49 37 82 88 82 28 0 53-8 73-24v-63h-73v34h35v16c-9 5-19 7-30 7-30 0-51-20-51-52 0-31 22-52 53-52 18 0 34 6 47 18l25-29c-20-15-45-21-76-21Z"
+          fill="#146939"/>
+
+    <path d="M193 58 111 213h43l18-36h56l18 36h44L208 58Zm-2 82 18-38 18 38Z"
+          fill="#FDC530"/>
+
+    <path d="M178 63 114 189h44l-18 69 86-123h-47l19-72Z"
+          fill="#F7F3E8" stroke="#17321A" stroke-width="5" stroke-linejoin="round"/>
+
+    <g fill="#17321A" stroke="#F7F3E8" stroke-width="5">
+      <circle cx="160" cy="24" r="18"/>
+      <circle cx="275" cy="91" r="18"/>
+      <circle cx="275" cy="229" r="18"/>
+      <circle cx="160" cy="296" r="18"/>
+      <circle cx="45" cy="229" r="18"/>
+      <circle cx="45" cy="91" r="18"/>
+    </g>
+
+    <g fill="#FDC530">
+      <circle cx="160" cy="24" r="11"/>
+      <circle cx="275" cy="229" r="11"/>
+      <circle cx="45" cy="91" r="11"/>
+    </g>
+  </g>
+</svg>
+
