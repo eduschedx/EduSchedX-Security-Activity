@@ -74,7 +74,30 @@ function requireStudent(): void
         header('Location: login.php');
         exit;
     }
+    if (!studentSubmissionStillExists()) {
+        finishStudentSession(['reset_notice' => 'Your previous activity was reset. Log in to start again.']);
+        header('Location: login.php');
+        exit;
+    }
     registerActivityRuntimeSave();
+}
+
+function studentSubmissionStillExists(): bool
+{
+    $hasRecordedProgress = !empty($_SESSION['security_part_complete'])
+        || !empty($_SESSION['part_two_complete'])
+        || !empty($_SESSION['part_three_complete']);
+    if (!$hasRecordedProgress) return true;
+
+    $statement = database()->prepare(
+        'SELECT 1 FROM activity_submissions
+         WHERE submission_id = :submission_id AND student_id = :student_id LIMIT 1'
+    );
+    $statement->execute([
+        'submission_id' => (string) ($_SESSION['submission_id'] ?? ''),
+        'student_id' => normalizeStudentId((string) ($_SESSION['student_id'] ?? '')),
+    ]);
+    return $statement->fetchColumn() !== false;
 }
 
 function activityRuntimeKeys(): array

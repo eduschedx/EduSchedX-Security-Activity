@@ -12,6 +12,23 @@ window.addEventListener('pageshow', (event) => {
     if (event.persisted) window.location.reload();
 });
 
+const verifySavedActivity = async () => {
+    try {
+        const response = await fetch('student-session-status.php', {
+            credentials: 'same-origin',
+            cache: 'no-store',
+            headers: { Accept: 'application/json' },
+        });
+        if (response.status === 401 || response.status === 409) {
+            sessionStorage.removeItem(studentTabKey);
+            window.location.replace('login.php');
+        }
+    } catch (_) {
+        // A temporary network failure must not interrupt an active activity.
+    }
+};
+window.setInterval(verifySavedActivity, 3000);
+
 if (logoutDialog && logoutForm) {
     document.querySelector('[data-logout-open]')?.addEventListener('click', () => {
         document.querySelector('.student-account')?.removeAttribute('open');

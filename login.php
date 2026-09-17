@@ -4,8 +4,9 @@ require __DIR__ . '/config.php';
 $error = '';
 $studentId = '';
 $logoutNotice = (string) ($_SESSION['logout_notice'] ?? '');
+$resetNotice = (string) ($_SESSION['reset_notice'] ?? '');
 $scoreNotice = isset($_GET['scores']) && $_GET['scores'] === '1' ? 'Log in to view your activity scores.' : '';
-unset($_SESSION['logout_notice']);
+unset($_SESSION['logout_notice'], $_SESSION['reset_notice']);
 unset($_SESSION['submission_receipt'], $_SESSION['duplicate_notice']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $studentIdDigits = preg_replace('/\D+/', '', (string) ($_POST['student_id'] ?? '')) ?? '';
@@ -35,6 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'student_id' => $rosterStudent['student_id'],
             ]);
             $existingSubmissionId = $progressStatement->fetchColumn();
+            if ($existingSubmissionId === false
+                && (!empty($_SESSION['security_part_complete']) || !empty($_SESSION['part_two_complete']) || !empty($_SESSION['part_three_complete']))) {
+                $sameStudentSession = false;
+            }
 
             $partStatement = database()->prepare(
                 'SELECT part_number, score, results_json FROM activity_part_records
@@ -102,15 +107,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p>Verify your student details to begin the security activity.</p>
                 </div>
                 <?php if ($logoutNotice !== ''): ?><div class="alert alert-success login-alert" role="status" data-auto-dismiss="10000"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><?= escape($logoutNotice) ?></div><?php endif; ?>
+                <?php if ($resetNotice !== ''): ?><div class="alert alert-warning login-alert" role="status" data-auto-dismiss="10000"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><?= escape($resetNotice) ?></div><?php endif; ?>
                 <?php if ($scoreNotice !== ''): ?><div class="alert alert-success login-alert" role="status" data-auto-dismiss="10000"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i><?= escape($scoreNotice) ?></div><?php endif; ?>
                 <?php if ($error !== ''): ?><div class="alert alert-danger py-2" data-auto-dismiss="60000"><?= escape($error) ?></div><?php endif; ?>
                     <form method="post" class="student-info-form">
                         <input type="hidden" name="csrf_token" value="<?= escape(csrfToken()) ?>">
                         <div><label class="form-label" for="student_id">Student ID</label><div class="login-field"><i class="bi bi-person-vcard" aria-hidden="true"></i><input class="form-control" id="student_id" name="student_id" maxlength="10" value="<?= escape($studentId) ?>" placeholder="XX-X-XXXXX" pattern="[0-9]{2}-[0-9]-[0-9]{5}" inputmode="numeric" autocomplete="off" data-student-id required autofocus></div></div>
-                        <div><label class="form-label" for="activity_code">Activity Code</label><div class="login-field"><i class="bi bi-key-fill" aria-hidden="true"></i><input class="form-control activity-code-input" id="activity_code" name="activity_code" maxlength="6" minlength="6" pattern="[A-HJ-NP-Z2-9]{6}" placeholder="XXXXXX" autocomplete="one-time-code" data-activity-code required></div></div>
+                        <div><label class="form-label" for="activity_code">Activity Code</label><div class="login-field"><i class="bi bi-key-fill" aria-hidden="true"></i><input class="form-control activity-code-input" id="activity_code" name="activity_code" maxlength="6" minlength="6" pattern="[A-HJ-NP-Za-hj-np-z2-9]{6}" placeholder="XXXXXX" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" data-activity-code required></div></div>
                         <button class="btn btn-eduschedx w-100" type="submit">Verify &amp; Continue <i class="bi bi-arrow-right ms-1"></i></button>
                     </form>
-                    <p class="login-privacy"><i class="bi bi-lock-fill" aria-hidden="true"></i> Your assigned activity details are verified securely.</p>
             </div>
         </section>
     </main>

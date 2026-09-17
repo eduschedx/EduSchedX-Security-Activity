@@ -240,9 +240,11 @@ document.querySelectorAll('[data-answer]').forEach((input) => {
 });
 
 document.querySelectorAll('[data-activity-code]').forEach((input) => {
-    input.addEventListener('input', () => {
+    const normalizeActivityCode = () => {
         input.value = input.value.toUpperCase().replace(/[^A-HJ-NP-Z2-9]/g, '').slice(0, 6);
-    });
+    };
+    input.addEventListener('blur', normalizeActivityCode);
+    input.addEventListener('paste', () => window.setTimeout(normalizeActivityCode, 0));
 });
 
 document.querySelectorAll('[data-student-id]').forEach((input) => {
