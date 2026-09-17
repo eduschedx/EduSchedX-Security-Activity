@@ -3,10 +3,7 @@ require __DIR__ . '/config.php';
 requireStudent();
 if (empty($_SESSION['part_two_complete'])) { header('Location: levels.php'); exit; }
 
-if (!isset($_SESSION['part_three_deadline']) || (int) $_SESSION['part_three_deadline'] > time() + 60) {
-    $_SESSION['part_three_deadline'] = time() + 60;
-}
-$deadline = (int) $_SESSION['part_three_deadline'];
+$deadline = partThreeDeadline();
 if (empty($_SESSION['part_three_complete']) && empty($_SESSION['part_three_ready']) && time() >= $deadline) expirePartThree();
 
 $attempts = max(0, min(2, (int) ($_SESSION['part_three_attempts'] ?? 0)));

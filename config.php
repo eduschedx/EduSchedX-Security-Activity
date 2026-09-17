@@ -74,6 +74,70 @@ function requireStudent(): void
         header('Location: login.php');
         exit;
     }
+    registerActivityRuntimeSave();
+}
+
+function activityRuntimeKeys(): array
+{
+    return [
+        'challenge_version', 'challenge_order', 'challenge_step', 'challenge_attempts',
+        'answer_draft', 'challenge_result', 'part_two_ready',
+        'security_definition_version', 'security_part_step', 'security_part_ready',
+        'security_unlock_draft', 'security_unlock_attempts', 'security_unlock_result',
+        'security_card_order', 'part_three_deadline', 'part_three_attempts',
+        'part_three_draft', 'part_three_generated', 'part_three_results',
+        'part_three_score', 'part_three_ready', 'part_three_timed_out',
+    ];
+}
+
+function loadActivityRuntime(string $studentId): void
+{
+    $statement = database()->prepare('SELECT state_json, part3_deadline FROM student_activity_runtime WHERE student_id = :student_id');
+    $statement->execute(['student_id' => normalizeStudentId($studentId)]);
+    $row = $statement->fetch();
+    if (!is_array($row)) return;
+
+    $state = json_decode((string) ($row['state_json'] ?? '{}'), true);
+    if (is_array($state)) {
+        foreach (activityRuntimeKeys() as $key) {
+            if (array_key_exists($key, $state)) $_SESSION[$key] = $state[$key];
+        }
+    }
+    if ((int) ($row['part3_deadline'] ?? 0) > 0) {
+        $_SESSION['part_three_deadline'] = (int) $row['part3_deadline'];
+    }
+}
+
+function saveActivityRuntime(): void
+{
+    if (empty($_SESSION['student_verified']) || empty($_SESSION['student_id'])) return;
+    $state = [];
+    foreach (activityRuntimeKeys() as $key) {
+        if (array_key_exists($key, $_SESSION)) $state[$key] = $_SESSION[$key];
+    }
+    $statement = database()->prepare(
+        'INSERT INTO student_activity_runtime (student_id, part3_deadline, state_json, updated_at)
+         VALUES (:student_id, :deadline, :state_json, :updated_at)
+         ON CONFLICT(student_id) DO UPDATE SET
+            part3_deadline = COALESCE(excluded.part3_deadline, student_activity_runtime.part3_deadline),
+            state_json = excluded.state_json,
+            updated_at = excluded.updated_at'
+    );
+    $deadline = (int) ($_SESSION['part_three_deadline'] ?? 0);
+    $statement->execute([
+        'student_id' => normalizeStudentId((string) $_SESSION['student_id']),
+        'deadline' => $deadline > 0 ? $deadline : null,
+        'state_json' => json_encode($state, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+        'updated_at' => gmdate('Y-m-d H:i:s'),
+    ]);
+}
+
+function registerActivityRuntimeSave(): void
+{
+    static $registered = false;
+    if ($registered) return;
+    $registered = true;
+    register_shutdown_function('saveActivityRuntime');
 }
 
 function requireOpenActivity(): void
@@ -120,6 +184,40 @@ function studentShuffledOrder(array $ids, string $part): array
         return $leftHash <=> $rightHash ?: ((int) $left <=> (int) $right);
     });
     return array_values($ids);
+}
+
+function partThreeDeadline(): int
+{
+    $studentId = normalizeStudentId((string) ($_SESSION['student_id'] ?? ''));
+    if ($studentId === '') return 0;
+
+    $statement = database()->prepare('SELECT part3_deadline FROM student_activity_runtime WHERE student_id = :student_id');
+    $statement->execute(['student_id' => $studentId]);
+    $savedDeadline = (int) ($statement->fetchColumn() ?: 0);
+
+    if ($savedDeadline <= 0) {
+        $savedDeadline = time() + 60;
+        $statement = database()->prepare(
+            'INSERT INTO student_activity_runtime (student_id, part3_deadline, updated_at)
+             VALUES (:student_id, :deadline, :updated_at)
+             ON CONFLICT(student_id) DO UPDATE SET
+                part3_deadline = CASE
+                    WHEN student_activity_runtime.part3_deadline IS NULL OR student_activity_runtime.part3_deadline <= 0
+                    THEN excluded.part3_deadline ELSE student_activity_runtime.part3_deadline END,
+                updated_at = excluded.updated_at'
+        );
+        $statement->execute([
+            'student_id' => $studentId,
+            'deadline' => $savedDeadline,
+            'updated_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+        $readBack = database()->prepare('SELECT part3_deadline FROM student_activity_runtime WHERE student_id = :student_id');
+        $readBack->execute(['student_id' => $studentId]);
+        $savedDeadline = (int) ($readBack->fetchColumn() ?: $savedDeadline);
+    }
+
+    $_SESSION['part_three_deadline'] = $savedDeadline;
+    return $savedDeadline;
 }
 
 function expirePartThree(): void

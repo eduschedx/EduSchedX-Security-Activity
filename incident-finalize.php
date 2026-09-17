@@ -16,6 +16,13 @@ if (empty($_SESSION['part_two_complete']) || empty($_SESSION['part_three_ready']
 $score = (int) ($_SESSION['part_three_score'] ?? 0);
 $score = $score === 5 ? 5 : 0;
 $results = is_array($_SESSION['part_three_results'] ?? null) ? $_SESSION['part_three_results'] : [];
+foreach ($results as &$result) {
+    $result['question'] = 'Complete the missing PHP condition that blocks a Faculty account after 5 failed login attempts.';
+    $result['answer'] = (string) ($_SESSION['part_three_draft'] ?? 'No answer submitted');
+    $result['expected'] = '$failedAttempts >= 5';
+    $result['attempts'] = (int) ($_SESSION['part_three_attempts'] ?? 0);
+}
+unset($result);
 
 recordActivityPart(3, $score, $results);
 $complete = database()->prepare(

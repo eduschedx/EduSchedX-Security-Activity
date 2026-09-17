@@ -17,19 +17,22 @@ if ($submissionId === false || $submissionId < 1) {
 
 $pdo = database();
 $pdo->beginTransaction();
-$lookup = $pdo->prepare('SELECT submission_id FROM activity_submissions WHERE id = :id');
+$lookup = $pdo->prepare('SELECT submission_id, student_id FROM activity_submissions WHERE id = :id');
 $lookup->execute(['id' => $submissionId]);
-$submissionKey = $lookup->fetchColumn();
-if ($submissionKey === false) {
+$submission = $lookup->fetch();
+if (!is_array($submission)) {
     $pdo->rollBack();
     http_response_code(404);
     exit('Submission not found.');
 }
+$submissionKey = (string) $submission['submission_id'];
 
 $release = $pdo->prepare('DELETE FROM submission_unique_keys WHERE submission_id = :submission_id');
 $release->execute(['submission_id' => $submissionKey]);
 $deletePartRecords = $pdo->prepare('DELETE FROM activity_part_records WHERE submission_id = :submission_id');
 $deletePartRecords->execute(['submission_id' => $submissionKey]);
+$deleteRuntime = $pdo->prepare('DELETE FROM student_activity_runtime WHERE student_id = :student_id');
+$deleteRuntime->execute(['student_id' => (string) ($submission['student_id'] ?? '')]);
 $statement = $pdo->prepare('DELETE FROM activity_submissions WHERE id = :id');
 $statement->execute(['id' => $submissionId]);
 $pdo->commit();

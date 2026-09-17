@@ -16,6 +16,12 @@ if (!$submission) {
     exit('Submission not found.');
 }
 $decodedResults = json_decode($submission['results_json'], true) ?: [];
+$runtimeState = [];
+if (!empty($submission['student_id'])) {
+    $runtimeStatement = database()->prepare('SELECT state_json FROM student_activity_runtime WHERE student_id = :student_id');
+    $runtimeStatement->execute(['student_id' => (string) $submission['student_id']]);
+    $runtimeState = json_decode((string) ($runtimeStatement->fetchColumn() ?: '{}'), true) ?: [];
+}
 $parts = isset($decodedResults['parts']) && is_array($decodedResults['parts'])
     ? $decodedResults['parts']
     : [
@@ -23,6 +29,52 @@ $parts = isset($decodedResults['parts']) && is_array($decodedResults['parts'])
         'part2' => ['title' => 'PHP Coding', 'score' => (int) ($submission['part2_score'] ?? $submission['score']), 'total' => 5, 'results' => $decodedResults],
         'part3' => ['title' => 'Security Challenge', 'score' => (int) ($submission['part3_score'] ?? 0), 'total' => 5, 'results' => [], 'status' => 'Coming Soon'],
     ];
+
+function resultQuestion(string $partKey, array $result): string
+{
+    if (!empty($result['question'])) return (string) $result['question'];
+    $title = (string) ($result['title'] ?? '');
+    $questions = [
+        'Session Status Check' => 'Sort each session status by whether access should continue.',
+        'Faculty Account Access Check' => 'Sort each Faculty account condition based on whether the security check should continue or deny access.',
+        'Secure Input Processing' => 'Match each input-handling action as secure or insecure.',
+        'Safe Error Messages' => 'Separate safe user messages from technical server details.',
+        'Failed Login Severity Check' => 'Match each failed-login attempt to its correct security severity level.',
+        'Session Security' => 'Type the PHP condition that denies access for an invalid authenticated session.',
+        'Authorization' => 'Type the PHP condition that denies unauthorized roles access to the Admin Dashboard.',
+        'Secure Input Validation' => 'Type the PHP condition that rejects input which is not valid.',
+        'Safe Error Handling' => 'Type the PHP statement that returns a safe error response.',
+        'Security Monitoring' => 'Type the PHP condition that assigns critical severity at the failed-login limit.',
+    ];
+    if ($partKey === 'part3') return 'Complete the missing PHP condition that blocks a Faculty account after 5 failed login attempts.';
+    return $questions[$title] ?? $title;
+}
+
+function resultExpected(string $partKey, array $result): mixed
+{
+    if ($partKey === 'part2') {
+        return [
+            1 => "\$sessionStatus !== 'VALID'",
+            2 => '!in_array($role, $allowedRoles, true)',
+            3 => "\$inputStatus !== 'VALID'",
+            4 => 'return safeErrorResponse()',
+            5 => '$failedAttempts >= 5',
+        ][(int) ($result['challenge'] ?? 0)] ?? ($result['expected'] ?? 'Not recorded');
+    }
+    if ($partKey === 'part3') return '$failedAttempts >= 5';
+    return $result['expected'] ?? 'Not recorded';
+}
+
+function resultValueHtml(mixed $value): string
+{
+    if (!is_array($value)) return '<code>' . adminEscape((string) $value) . '</code>';
+    if ($value === []) return '<span class="result-not-recorded">Not recorded</span>';
+    $items = '';
+    foreach ($value as $item => $answer) {
+        $items .= '<li><span>' . adminEscape(str_replace('_', ' ', (string) $item)) . '</span><strong>' . adminEscape(str_replace('_', ' ', (string) $answer)) . '</strong></li>';
+    }
+    return '<ul class="admin-answer-map">' . $items . '</ul>';
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -51,15 +103,18 @@ $parts = isset($decodedResults['parts']) && is_array($decodedResults['parts'])
                 <section class="admin-table-card part-result-card">
                     <div class="part-result-heading"><div><span><?= $partLabel ?></span><h2><?= adminEscape((string) ($part['title'] ?? 'Activity')) ?></h2></div><strong><?= (int) ($part['score'] ?? 0) ?>/<?= (int) ($part['total'] ?? 5) ?></strong></div>
                     <?php if ($partResults !== []): ?>
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                                <thead><tr><th>Challenge</th><th>Result</th></tr></thead>
-                                <tbody>
-                                <?php foreach ($partResults as $result): $passed = !empty($result['passed']); ?>
-                                    <tr><td><?= adminEscape((string) ($result['title'] ?? ('Challenge ' . ($result['challenge'] ?? '')))) ?></td><td class="<?= $passed ? 'case-pass' : 'case-fail' ?>"><i class="bi <?= $passed ? 'bi-check-circle-fill' : 'bi-x-circle-fill' ?>"></i></td></tr>
-                                <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                        <div class="admin-result-details">
+                        <?php foreach ($partResults as $result): $passed = !empty($result['passed']); $answer = $result['answer'] ?? ($partKey === 'part3' ? ($runtimeState['part_three_draft'] ?? 'Not recorded') : 'Not recorded'); ?>
+                            <details class="admin-result-detail">
+                                <summary><span><?= adminEscape((string) ($result['title'] ?? ('Challenge ' . ($result['challenge'] ?? '')))) ?></span><span class="admin-result-status <?= $passed ? 'case-pass' : 'case-fail' ?>"><i class="bi <?= $passed ? 'bi-check-circle-fill' : 'bi-x-circle-fill' ?>"></i><?= $passed ? 'Correct' : 'Needs Review' ?></span><i class="bi bi-chevron-down admin-result-chevron" aria-hidden="true"></i></summary>
+                                <div class="admin-result-detail-body">
+                                    <div class="admin-question-text"><span>Question</span><p><?= adminEscape(resultQuestion($partKey, $result)) ?></p></div>
+                                    <div class="admin-answer-column"><span>Student Answer</span><?= resultValueHtml($answer) ?></div>
+                                    <div class="admin-answer-column expected"><span>Correct Answer / Code</span><?= resultValueHtml(resultExpected($partKey, $result)) ?></div>
+                                    <p class="admin-attempts"><i class="bi bi-arrow-repeat"></i> <?= (int) ($result['attempts'] ?? ($partKey === 'part3' ? ($runtimeState['part_three_attempts'] ?? 0) : 0)) ?> of 2 attempts used</p>
+                                </div>
+                            </details>
+                        <?php endforeach; ?>
                         </div>
                     <?php else: ?>
                         <p class="part-result-empty"><?= adminEscape((string) ($part['status'] ?? 'No detailed results were recorded.')) ?></p>

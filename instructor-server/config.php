@@ -132,6 +132,18 @@ function database(): PDO
     $pdo->exec('CREATE INDEX IF NOT EXISTS idx_part_records_student ON activity_part_records(student_id)');
     $pdo->exec('CREATE INDEX IF NOT EXISTS idx_part_records_completed ON activity_part_records(completed_at)');
     $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS student_activity_runtime (
+            student_id TEXT PRIMARY KEY,
+            part3_deadline INTEGER NULL,
+            state_json TEXT NOT NULL DEFAULT \'{}\',
+            updated_at TEXT NOT NULL
+        )'
+    );
+    $runtimeColumns = $pdo->query('PRAGMA table_info(student_activity_runtime)')->fetchAll();
+    if (!in_array('state_json', array_column($runtimeColumns, 'name'), true)) {
+        $pdo->exec("ALTER TABLE student_activity_runtime ADD COLUMN state_json TEXT NOT NULL DEFAULT '{}'");
+    }
+    $pdo->exec(
         "INSERT OR IGNORE INTO submission_unique_keys (key_type, key_value, submission_id)
          SELECT 'SUBMISSION_ID', submission_id, submission_id FROM activity_submissions"
     );

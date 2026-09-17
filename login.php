@@ -1,12 +1,6 @@
 <?php
 require __DIR__ . '/config.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET'
-    && empty($_GET['tab_required'])
-    && !empty($_SESSION['student_verified'])) {
-    finishStudentSession();
-}
-
 $error = '';
 $studentId = '';
 $logoutNotice = (string) ($_SESSION['logout_notice'] ?? '');
@@ -30,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($rosterStudent === null) {
             $error = 'Student information could not be verified.';
         } else {
+            $sameStudentSession = !empty($_SESSION['student_verified'])
+                && normalizeStudentId((string) ($_SESSION['student_id'] ?? '')) === normalizeStudentId((string) $rosterStudent['student_id']);
             $progressStatement = database()->prepare(
                 'SELECT submission_id FROM activity_submissions
                  WHERE student_id = :student_id
@@ -48,13 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $completedParts = $partStatement->fetchAll();
 
             session_regenerate_id(true);
-            $_SESSION = [];
+            if (!$sameStudentSession) $_SESSION = [];
             $studentId = (string) $rosterStudent['student_id'];
             $_SESSION['student_id'] = $studentId;
             $_SESSION['full_name'] = (string) $rosterStudent['full_name'];
             $_SESSION['assigned_station'] = (string) $rosterStudent['assigned_station'];
             $_SESSION['student_verified'] = true;
             $_SESSION['submission_id'] = is_string($existingSubmissionId) && $existingSubmissionId !== '' ? $existingSubmissionId : bin2hex(random_bytes(16));
+            loadActivityRuntime($studentId);
             foreach ($completedParts as $completedPart) {
                 $partNumber = (int) $completedPart['part_number'];
                 $partResults = json_decode((string) $completedPart['results_json'], true) ?: [];
