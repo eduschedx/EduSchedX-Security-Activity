@@ -251,12 +251,49 @@ body {
 .student-account-menu form { margin: 0; }
 .student-account-menu button { width: 100%; display: flex; align-items: center; justify-content: center; gap: .45rem; padding: .6rem .75rem; border: 0; border-radius: .55rem; background: #a83d3d; color: #fff; font-size: .74rem; font-weight: 800; }
 .student-account-menu button:hover { background: #8e3030; }
-.logout-dialog { width: min(92vw, 430px); }
-.logout-dialog,
-.logout-dialog button,
-.student-account-menu button { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif; }
-.logout-dialog .btn-danger { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; background: #a83d3d; border-color: #a83d3d; }
-.logout-dialog .btn-danger:hover { background: #8e3030; border-color: #8e3030; }
+.logout-dialog {
+width: min(92vw, 430px);
+font-family: -apple-system, BlinkMacSystemFont,
+"SF Pro Display", "SF Pro Text",
+"Segoe UI", sans-serif;
+}
+
+.logout-dialog h2,
+.logout-dialog p,
+.logout-dialog button {
+font-family: inherit !important;
+}
+
+.logout-dialog h2 {
+font-size: 1.15rem;
+font-weight: 800;
+letter-spacing: -0.02em;
+}
+
+.logout-dialog p {
+font-size: .84rem;
+font-weight: 500;
+line-height: 1.55;
+}
+
+.logout-dialog button {
+font-size: .78rem;
+font-weight: 750;
+}
+
+.logout-dialog .btn-danger {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: .4rem;
+background: #a83d3d;
+border-color: #a83d3d;
+}
+
+.logout-dialog .btn-danger:hover {
+background: #8e3030;
+border-color: #8e3030;
+}
 .login-alert { display: flex; align-items: center; gap: .5rem; margin-bottom: .85rem; border-color: rgba(8,127,89,.25); background: rgba(225,244,235,.94); color: #075b43; font-size: .76rem; }
 
 .brand-link {
@@ -1788,22 +1825,26 @@ code {
     .welcome-identity { grid-template-columns: 1fr; gap: .65rem; }
 }
 
-/* Keep the mobile header above the content and let it scroll with the page. */
+/* Keep the student header fixed on mobile. */
 @media (max-width: 767.98px) {
     .brand-header {
-        position: relative;
-        top: auto;
-        left: auto;
-        flex: 0 0 auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
     }
+
     .activity-shell {
-        min-height: calc(100vh - 70px);
-        padding-top: .5rem;
+        min-height: 100vh;
+        padding-top: 5.5rem;
     }
+
     .incident-shell {
-        padding-top: .5rem;
+        padding-top: 5.5rem;
     }
+
     .part-three-submitted .alert-simulator-shell {
-        min-height: calc(100vh - 70px);
+        min-height: 100vh;
     }
 }
