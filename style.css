@@ -878,6 +878,12 @@ body {
 .security-alert-card { padding: 1rem; border-radius: .8rem; }
 .security-alert-card.is-critical { border: 1px solid rgba(187,55,55,.58); background: linear-gradient(145deg,#5b171b,#2e1013); color: #fff3f1; box-shadow: 0 12px 28px rgba(89,20,24,.28); }
 .security-alert-card.is-normal { border: 1px solid rgba(39,137,99,.35); background: #e5f3eb; color: #124735; }
+.security-alert-card.is-unrecognized { border: 1px solid rgba(142,91,34,.38); background: #f3ead9; color: #60451f; }
+.security-alert-card.is-unrecognized .security-alert-label { color: #8b5a21; }
+.security-alert-card.is-unrecognized .security-profile { border-color: rgba(142,91,34,.18); background: rgba(142,91,34,.07); }
+.security-alert-card.is-unrecognized .security-profile-avatar { border-color: rgba(142,91,34,.25); background: rgba(142,91,34,.12); color: #8b5a21; }
+.security-alert-card.is-unrecognized .security-profile strong { color: #60451f; }
+.security-alert-card.is-unrecognized .security-profile span, .security-alert-card.is-unrecognized .security-profile p { color: #78654b; }
 .security-alert-label { display: flex; align-items: center; gap: .35rem; margin-bottom: .2rem; color: #ffb9b4; font-size: .64rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
 .security-alert-card dt { display: flex; align-items: center; gap: .35rem; }
 .security-alert-label i, .security-alert-card dt i { font-size: .78rem; }

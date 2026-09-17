@@ -25,9 +25,9 @@ try {
     // expression (ignoring whitespace) can generate the target interface.
     $isExactAnswer = hash_equals('$failedAttempts>=5', normalizePhpAnswer($condition));
     if ($isExactAnswer) {
-        $generated = ['critical'=>true,'severity'=>'CRITICAL','user_type'=>'Faculty Account','failed_attempts'=>5,'access'=>'BLOCKED','message'=>'Suspicious login activity detected.','response'=>'The account has been temporarily restricted. The event has been logged and the Superadmin has been notified.'];
+        $generated = ['recognized'=>true,'critical'=>true,'severity'=>'CRITICAL','user_type'=>'Faculty Account','failed_attempts'=>5,'access'=>'BLOCKED','message'=>'Suspicious login activity detected.','response'=>'The account has been temporarily restricted. The event has been logged and the Superadmin has been notified.'];
     } else {
-        $generated = ['critical'=>false,'severity'=>'INFO','user_type'=>'Faculty Account','failed_attempts'=>5,'access'=>'ALLOWED','message'=>'Normal login activity.','response'=>'No restriction or security alert was generated.'];
+        $generated = ['recognized'=>false,'critical'=>false,'severity'=>'UNRECOGNIZED','user_type'=>'Unknown','failed_attempts'=>0,'access'=>'UNKNOWN','message'=>'The PHP condition was not recognized.','response'=>'No security interface could be generated.'];
     }
 
     $checks = array_fill_keys(['Severity', 'User Type', 'Failed Attempts', 'Access Status', 'Security Response'], $isExactAnswer);
