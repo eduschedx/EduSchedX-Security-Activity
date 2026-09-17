@@ -4,7 +4,7 @@ declare(strict_types=1);
 return [
     ['student_id' => '16-2-00214', 'full_name' => 'John Carlo T. Cadapan', 'assigned_station' => 'PC-01', 'activity_code_hash' => '$2y$10$ExxeQgAE2P0GntHQ9FeaxuOHOwRXBOZ6X0dnkSVE9zoWlReuTik4K'],
     ['student_id' => '21-1-00197', 'full_name' => 'CJ L. Morfe', 'assigned_station' => 'PC-02', 'activity_code_hash' => '$2y$10$3OVVEtz5nGgT7lg7yvhGiO8.glNAE1bQLG8rWGS6Zuj4jTJHnm8Mi'],
-    ['student_id' => '23-1-00035', 'full_name' => 'John Norman B. Alviado', 'assigned_station' => 'PC-03', 'activity_code_hash' => '$2y$10$Ia1XE6HdikSLY9SPdoCXAOUbexNRve2qTQ5C1gmiBs1CzBAcsPnkO'],
+    ['student_id' => '23-1-00035', 'full_name' => 'John Norman B. Aliviado', 'assigned_station' => 'PC-03', 'activity_code_hash' => '$2y$10$Ia1XE6HdikSLY9SPdoCXAOUbexNRve2qTQ5C1gmiBs1CzBAcsPnkO'],
     ['student_id' => '23-1-00085', 'full_name' => 'Kim B. Baldonado', 'assigned_station' => 'PC-04', 'activity_code_hash' => '$2y$10$bYUMe7hSKIjTjP04G87LbuA0MmJmTzn59i8QlGVOIlF/p98fKcWM2'],
     ['student_id' => '23-1-00095', 'full_name' => 'Dennis Jr. B. Barangan', 'assigned_station' => 'PC-05', 'activity_code_hash' => '$2y$10$rO4n.vArVOqD05qTjwT.8ejlIrUBGdSo64b6rBoLehUHbq3RsTSA2'],
     ['student_id' => '23-1-00182', 'full_name' => 'Graczielle Hans Conge', 'assigned_station' => 'PC-06', 'activity_code_hash' => '$2y$10$.x/RBoQfmMh3Ay7CLcxFJejslqIlD8Wbb5oNHkn6jdBDax1aJgdAO'],
