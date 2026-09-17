@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET'
 $error = '';
 $studentId = '';
 $logoutNotice = (string) ($_SESSION['logout_notice'] ?? '');
+$scoreNotice = isset($_GET['scores']) && $_GET['scores'] === '1' ? 'Log in to view your activity scores.' : '';
 unset($_SESSION['logout_notice']);
 unset($_SESSION['submission_receipt'], $_SESSION['duplicate_notice']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -104,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p>Verify your student details to begin the security activity.</p>
                 </div>
                 <?php if ($logoutNotice !== ''): ?><div class="alert alert-success login-alert" role="status" data-auto-dismiss="10000"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><?= escape($logoutNotice) ?></div><?php endif; ?>
+                <?php if ($scoreNotice !== ''): ?><div class="alert alert-success login-alert" role="status" data-auto-dismiss="10000"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i><?= escape($scoreNotice) ?></div><?php endif; ?>
                 <?php if ($error !== ''): ?><div class="alert alert-danger py-2" data-auto-dismiss="60000"><?= escape($error) ?></div><?php endif; ?>
                     <form method="post" class="student-info-form">
                         <input type="hidden" name="csrf_token" value="<?= escape(csrfToken()) ?>">

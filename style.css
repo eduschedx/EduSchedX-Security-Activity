@@ -908,7 +908,7 @@ body {
 .sim-final-result strong { grid-row: 1 / span 2; grid-column: 2; color: #074a36; font-size: 1.4rem; }
 .sim-final-result .btn { grid-column: 1; width: min(100%, 260px); margin-top: .35rem; }
 .submit-dialog.part-three-dialog { width: min(calc(100% - 2rem), 620px); padding: clamp(2rem, 5vw, 3.25rem); border: 2px solid rgba(8,127,89,.58); border-radius: 1.25rem; background: rgba(247,244,229,.97); text-align: center; }
-.thank-you-dialog::backdrop { background: rgba(0, 24, 15, .46); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.submit-dialog.thank-you-dialog::backdrop { background: rgba(0, 24, 15, .46); backdrop-filter: none; -webkit-backdrop-filter: none; }
 .part-three-dialog .part-three-dialog-icon { display: grid; width: 3.5rem; height: 3.5rem; margin: 0 auto .8rem; place-items: center; border-radius: 50%; background: #078b65; color: #fff; font-size: 1.45rem; box-shadow: 0 10px 24px rgba(7,139,101,.24); }
 .part-three-dialog .part-three-dialog-icon.is-heart { background: #d95d72; box-shadow: 0 10px 24px rgba(217,93,114,.24); font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; font-size: 1.7rem; }
 .part-three-dialog > h2 { margin: .35rem 0 .2rem; color: #073f30; font-size: 1.55rem; font-weight: 850; }
@@ -1327,6 +1327,8 @@ code {
 .unlock-context { margin: 0 0 .75rem; padding: .55rem .7rem; border-left: 3px solid var(--gold); background: rgba(255, 255, 255, .55); color: var(--deep-green); font-size: .76rem; font-weight: 800; }
 .unlock-instruction { margin: 0; color: var(--muted); font-size: .76rem; }
 .unlock-form { display: grid; gap: .8rem; }
+.unlock-form.is-locked .drag-stage { pointer-events: none; }
+.unlock-form.is-locked .unlock-card { cursor: default; animation: none; }
 .unlock-pool { min-height: 58px; display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; padding: .7rem; border: 1px dashed rgba(8, 127, 89, .35); border-radius: .6rem; background: rgba(255, 255, 255, .28); }
 .unlock-target-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .7rem; }
 .unlock-target { min-height: 105px; padding: .7rem; border: 1px dashed rgba(8, 127, 89, .45); border-radius: .6rem; background: rgba(255, 255, 255, .45); }

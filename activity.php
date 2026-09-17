@@ -40,6 +40,7 @@ $partOneQuestionId = (int) $partOneOrder[$partOneStep - 1];
 $unlock = $unlockQuestions[$partOneQuestionId];
 $unlockDraft = (array) ($_SESSION['security_unlock_draft'][$partOneQuestionId] ?? []);
 $unlockAttemptsUsed = (int) ($_SESSION['security_unlock_attempts'][$partOneQuestionId] ?? 0);
+$unlockLocked = !empty($_SESSION['security_unlock_result'][$partOneQuestionId]) || $unlockAttemptsUsed >= 2;
 if (!isset($_SESSION['security_card_order'][$partOneQuestionId])) {
     $_SESSION['security_card_order'][$partOneQuestionId] = array_keys($unlock['cards']);
     shuffle($_SESSION['security_card_order'][$partOneQuestionId]);
@@ -75,7 +76,7 @@ if (!empty($unlock['ordered'])) usort($cardOrder, static fn (string $a, string $
                     <?php else: ?>
                     <div class="panel-heading activity-intro-card"><span class="eyebrow">Part 1 · Security Matching · Question <?= $partOneStep ?> of 5</span><h1><?= escape($unlock['title']) ?></h1><p><?= escape($unlock['description']) ?></p></div>
                     <section class="part-one-workspace" id="security-unlock" data-activity-page>
-                        <form action="grader.php" method="post" class="unlock-form" data-unlock-form data-ordered="<?= !empty($unlock['ordered']) ? 'true' : 'false' ?>">
+                        <form action="grader.php" method="post" class="unlock-form <?= $unlockLocked ? 'is-locked' : '' ?>" data-unlock-form data-ordered="<?= !empty($unlock['ordered']) ? 'true' : 'false' ?>" data-locked="<?= $unlockLocked ? 'true' : 'false' ?>">
                             <input type="hidden" name="csrf_token" value="<?= escape(csrfToken()) ?>"><input type="hidden" name="mode" value="unlock_part"><input type="hidden" name="challenge_id" value="1">
                             <div class="drag-stage">
                                 <div class="drag-stage-title"><span>Security Match</span><div class="question-progress"><strong>Question <?= $partOneStep ?> of 5</strong><ol aria-label="Security matching progress"><?php for ($progressStep = 1; $progressStep <= 5; $progressStep++): ?><li class="<?= $progressStep < $partOneStep ? 'is-done' : ($progressStep === $partOneStep ? 'is-current' : '') ?>" <?= $progressStep === $partOneStep ? 'aria-current="step"' : '' ?>><?= $progressStep ?></li><?php endfor; ?></ol></div></div>

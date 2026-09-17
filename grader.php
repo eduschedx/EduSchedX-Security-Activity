@@ -153,7 +153,7 @@ if (basename($_SERVER['SCRIPT_FILENAME']) === 'grader.php') {
         $questionId = (int) $questionOrder[$questionPosition - 1];
         $unlock = securityUnlockDefinitions()[$questionId];
         $unlockAttempts = (int) ($_SESSION['security_unlock_attempts'][$questionId] ?? 0);
-        if ($unlockAttempts >= 2) { header('Location: activity.php#security-unlock'); exit; }
+        if ($unlockAttempts >= 2 || !empty($_SESSION['security_unlock_result'][$questionId])) { header('Location: activity.php#security-unlock'); exit; }
         $submitted = [];
         foreach ((array) ($_POST['unlock_assignment'] ?? []) as $card => $target) {
             if (isset($unlock['cards'][(string) $card]) && is_scalar($target)) $submitted[(string) $card] = substr((string) $target, 0, 20);

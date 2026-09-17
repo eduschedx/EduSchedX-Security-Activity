@@ -97,6 +97,18 @@ document.querySelectorAll('[data-unlock-form]').forEach((form) => {
     let selectedCard = null;
     const ordered = form.dataset.ordered === 'true';
     const cards = () => [...form.querySelectorAll('[data-unlock-card]')];
+    if (form.dataset.locked === 'true') {
+        cards().forEach((card) => {
+            card.draggable = false;
+            card.tabIndex = -1;
+        });
+        form.querySelectorAll('[data-unlock-target]').forEach((target) => {
+            target.tabIndex = -1;
+            target.removeAttribute('role');
+        });
+        form.querySelectorAll('[data-move]').forEach((button) => { button.disabled = true; });
+        return;
+    }
     const syncAssignments = () => {
         const checkButton = form.querySelector('[data-check-unlock]');
         if (ordered) {

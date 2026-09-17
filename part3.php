@@ -68,8 +68,8 @@ unset($_SESSION['part_three_error']);
     <div class="part-three-dialog-icon is-heart"><span aria-hidden="true">🫰</span></div>
     <span class="eyebrow">Activity Submitted</span>
     <h2 id="part-three-thanks-title">Thank you, Classmate! Lab lots! 🫰</h2>
-    <p>Your Part 3 result has been recorded. Great work completing the EduSchedX security activity.<br><strong>From the EduSchedX Team</strong></p>
-    <a class="btn btn-eduschedx" href="login.php">Return to Login <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    <p>Your Part 3 result has been recorded. Great work completing the EduSchedX security activity.</p>
+    <a class="btn btn-eduschedx" href="login.php?scores=1">Return to Login <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
 </dialog>
 <?php endif; ?>
 </main></body></html>
