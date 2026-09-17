@@ -15,12 +15,11 @@ if (empty($_SESSION['duplicate_notice'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
 </head>
-<body>
+<body class="already-submitted-page">
     <header class="brand-header"><a href="login.php" class="brand-link"><img src="images/eduschedx-logo.svg" alt="" class="brand-logo"><span class="brand-name">EduSched<span>X</span></span></a></header>
     <main class="activity-shell">
-        <section class="activity-card compact-card">
-            <?= studentProgress('Student Info') ?>
-            <div class="screen-panel submission-received">
+        <section class="activity-card compact-card login-card already-submitted-card">
+            <div class="screen-panel login-panel submission-received already-submitted-panel">
                 <div class="submission-icon submission-warning"><i class="bi bi-info-lg"></i></div>
                 <h1>Activity Already Submitted</h1>
                 <p>You have already submitted this activity.</p>

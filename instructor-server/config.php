@@ -73,8 +73,24 @@ function database(): PDO
     if (!in_array('ip_address', $columnNames, true)) {
         $pdo->exec('ALTER TABLE activity_submissions ADD COLUMN ip_address TEXT NULL');
     }
-    if (!in_array('feedback', $columnNames, true)) {
-        $pdo->exec('ALTER TABLE activity_submissions ADD COLUMN feedback TEXT NULL');
+    $partScoreColumnsAdded = false;
+    if (!in_array('part1_score', $columnNames, true)) {
+        $pdo->exec('ALTER TABLE activity_submissions ADD COLUMN part1_score INTEGER NOT NULL DEFAULT 0');
+        $partScoreColumnsAdded = true;
+    }
+    if (!in_array('part2_score', $columnNames, true)) {
+        $pdo->exec('ALTER TABLE activity_submissions ADD COLUMN part2_score INTEGER NOT NULL DEFAULT 0');
+        $partScoreColumnsAdded = true;
+    }
+    if (!in_array('part3_score', $columnNames, true)) {
+        $pdo->exec('ALTER TABLE activity_submissions ADD COLUMN part3_score INTEGER NOT NULL DEFAULT 0');
+        $partScoreColumnsAdded = true;
+    }
+    if (!in_array('is_complete', $columnNames, true)) {
+        $pdo->exec('ALTER TABLE activity_submissions ADD COLUMN is_complete INTEGER NOT NULL DEFAULT 0');
+    }
+    if ($partScoreColumnsAdded) {
+        $pdo->exec('UPDATE activity_submissions SET part2_score = score, total = 15');
     }
 
     $pdo->exec(
@@ -98,6 +114,23 @@ function database(): PDO
             PRIMARY KEY (key_type, key_value)
         )'
     );
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS activity_part_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            submission_id TEXT NOT NULL,
+            student_id TEXT NOT NULL,
+            student_name TEXT NOT NULL,
+            station TEXT NOT NULL,
+            part_number INTEGER NOT NULL,
+            score INTEGER NOT NULL,
+            total INTEGER NOT NULL DEFAULT 5,
+            results_json TEXT NOT NULL,
+            completed_at TEXT NOT NULL,
+            UNIQUE(submission_id, part_number)
+        )'
+    );
+    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_part_records_student ON activity_part_records(student_id)');
+    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_part_records_completed ON activity_part_records(completed_at)');
     $pdo->exec(
         "INSERT OR IGNORE INTO submission_unique_keys (key_type, key_value, submission_id)
          SELECT 'SUBMISSION_ID', submission_id, submission_id FROM activity_submissions"
@@ -138,6 +171,101 @@ function formatSubmissionTime(string $utcTimestamp): string
     } catch (Exception) {
         return '—';
     }
+}
+
+function recordActivityPart(int $partNumber, int $score, array $results): void
+{
+    if ($partNumber < 1 || $partNumber > 3
+        || empty($_SESSION['submission_id'])
+        || empty($_SESSION['student_id'])
+        || empty($_SESSION['full_name'])
+        || empty($_SESSION['assigned_station'])) {
+        return;
+    }
+    $pdo = database();
+    $statement = $pdo->prepare(
+        'INSERT INTO activity_part_records
+         (submission_id, student_id, student_name, station, part_number, score, total, results_json, completed_at)
+         VALUES (:submission_id, :student_id, :student_name, :station, :part_number, :score, 5, :results_json, :completed_at)
+         ON CONFLICT(submission_id, part_number) DO UPDATE SET
+             score = excluded.score,
+             results_json = excluded.results_json,
+             completed_at = excluded.completed_at'
+    );
+    $statement->execute([
+        'submission_id' => (string) $_SESSION['submission_id'],
+        'student_id' => (string) $_SESSION['student_id'],
+        'student_name' => (string) $_SESSION['full_name'],
+        'station' => (string) $_SESSION['assigned_station'],
+        'part_number' => $partNumber,
+        'score' => max(0, min(5, $score)),
+        'results_json' => json_encode($results, JSON_THROW_ON_ERROR),
+        'completed_at' => gmdate('Y-m-d H:i:s'),
+    ]);
+
+    $existingSubmission = $pdo->prepare(
+        'SELECT part1_score, part2_score, part3_score, results_json
+         FROM activity_submissions WHERE submission_id = :submission_id LIMIT 1'
+    );
+    $existingSubmission->execute(['submission_id' => (string) $_SESSION['submission_id']]);
+    $existing = $existingSubmission->fetch();
+    $existingResults = $existing ? json_decode((string) $existing['results_json'], true) : [];
+    $scores = [
+        1 => (int) ($existing['part1_score'] ?? 0),
+        2 => (int) ($existing['part2_score'] ?? 0),
+        3 => (int) ($existing['part3_score'] ?? 0),
+    ];
+    $parts = is_array($existingResults['parts'] ?? null) ? $existingResults['parts'] : [];
+
+    $partRows = $pdo->prepare(
+        'SELECT part_number, score, results_json, completed_at
+         FROM activity_part_records WHERE submission_id = :submission_id'
+    );
+    $partRows->execute(['submission_id' => (string) $_SESSION['submission_id']]);
+    $latestCompletion = gmdate('Y-m-d H:i:s');
+    foreach ($partRows->fetchAll() as $partRow) {
+        $number = (int) $partRow['part_number'];
+        if ($number < 1 || $number > 3) continue;
+        $scores[$number] = (int) $partRow['score'];
+        $parts['part' . $number] = [
+            'title' => [1 => 'Security Matching', 2 => 'PHP Coding', 3 => 'Security Alert Simulator'][$number],
+            'score' => $scores[$number],
+            'total' => 5,
+            'results' => json_decode((string) $partRow['results_json'], true) ?: [],
+        ];
+        if ((string) $partRow['completed_at'] > $latestCompletion) $latestCompletion = (string) $partRow['completed_at'];
+    }
+    $overallScore = array_sum($scores);
+    $submission = $pdo->prepare(
+        'INSERT INTO activity_submissions
+         (submission_id, student_id, student_name, student_name_normalized, station, station_normalized,
+          ip_address, part1_score, part2_score, part3_score, score, total, results_json, is_complete, submitted_at)
+         VALUES (:submission_id, :student_id, :student_name, :student_name_normalized, :station,
+                 :station_normalized, :ip_address, :part1_score, :part2_score, :part3_score,
+                 :score, 15, :results_json, 0, :submitted_at)
+         ON CONFLICT(submission_id) DO UPDATE SET
+             part1_score = excluded.part1_score,
+             part2_score = excluded.part2_score,
+             part3_score = excluded.part3_score,
+             score = excluded.score,
+             results_json = excluded.results_json,
+             submitted_at = excluded.submitted_at'
+    );
+    $submission->execute([
+        'submission_id' => (string) $_SESSION['submission_id'],
+        'student_id' => normalizeStudentId((string) $_SESSION['student_id']),
+        'student_name' => (string) $_SESSION['full_name'],
+        'student_name_normalized' => normalizeStudentName((string) $_SESSION['full_name']),
+        'station' => canonicalStation((string) $_SESSION['assigned_station']),
+        'station_normalized' => canonicalStation((string) $_SESSION['assigned_station']),
+        'ip_address' => observedClientIp(),
+        'part1_score' => $scores[1],
+        'part2_score' => $scores[2],
+        'part3_score' => $scores[3],
+        'score' => $overallScore,
+        'results_json' => json_encode(['parts' => $parts, 'overall' => ['score' => $overallScore, 'total' => 15]], JSON_THROW_ON_ERROR),
+        'submitted_at' => $latestCompletion,
+    ]);
 }
 
 function normalizeStudentId(string $studentId): string

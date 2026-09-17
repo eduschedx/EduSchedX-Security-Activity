@@ -17,6 +17,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+// Protected activity pages must never be restored from the browser's
+// back-forward cache after a student returns to the login screen.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 function escape(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
@@ -90,4 +96,46 @@ function studentProgress(string $active): string
     }
 
     return $html . '</div>';
+}
+
+function studentBrandHeader(): string
+{
+    $name = escape((string) ($_SESSION['full_name'] ?? 'Student'));
+    return '<script>document.documentElement.classList.add("student-auth-pending")</script>'
+        . '<header class="brand-header student-brand-header">'
+        . '<a href="index.php" class="brand-link"><img src="images/eduschedx-logo.svg" alt="" class="brand-logo"><span class="brand-name">EduSched<span>X</span></span></a>'
+        . '<details class="student-account"><summary><span class="student-account-name">' . $name . '</span><span class="student-account-toggle"><i class="bi bi-chevron-down" aria-hidden="true"></i></span></summary>'
+        . '<div class="student-account-menu"><div><small>Signed in as</small><strong>' . $name . '</strong></div><form id="student-logout-form" action="logout.php" method="post"><input type="hidden" name="csrf_token" value="' . escape(csrfToken()) . '"><button type="button" data-logout-open><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Logout</button></form></div></details>'
+        . '</header>'
+        . '<dialog class="submit-dialog logout-dialog" data-logout-dialog aria-labelledby="logout-dialog-title"><div class="submit-dialog-head"><h2 id="logout-dialog-title">Logout?</h2><button type="button" class="submit-dialog-close" data-logout-cancel aria-label="Close">&times;</button></div><p>Are you sure you want to log out of your student account?</p><div class="submit-dialog-actions"><button type="button" class="btn btn-light" data-logout-cancel>Cancel</button><button type="button" class="btn btn-danger" data-logout-confirm><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Yes, Logout</button></div></dialog>'
+        . '<script src="account.js" defer></script>';
+}
+
+function studentShuffledOrder(array $ids, string $part): array
+{
+    $studentKey = normalizeStudentId((string) ($_SESSION['student_id'] ?? 'student'));
+    usort($ids, static function ($left, $right) use ($studentKey, $part): int {
+        $leftHash = hash('sha256', $studentKey . '|' . $part . '|' . (string) $left);
+        $rightHash = hash('sha256', $studentKey . '|' . $part . '|' . (string) $right);
+        return $leftHash <=> $rightHash ?: ((int) $left <=> (int) $right);
+    });
+    return array_values($ids);
+}
+
+function expirePartThree(): void
+{
+    if (!empty($_SESSION['part_three_complete']) || !empty($_SESSION['part_three_ready'])) return;
+    $titles = ['Severity', 'User Type', 'Failed Attempts', 'Access Status', 'Security Response'];
+    $_SESSION['part_three_attempts'] = 2;
+    if (trim((string) ($_SESSION['part_three_draft'] ?? '')) === '') {
+        unset($_SESSION['part_three_generated']);
+    }
+    $_SESSION['part_three_results'] = array_map(
+        static fn (string $title, int $index): array => ['challenge' => $index + 1, 'title' => $title, 'passed' => false],
+        $titles,
+        array_keys($titles)
+    );
+    $_SESSION['part_three_score'] = 0;
+    $_SESSION['part_three_ready'] = true;
+    $_SESSION['part_three_timed_out'] = true;
 }

@@ -11,21 +11,20 @@ requireOpenActivity();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
 </head>
-<body>
-    <header class="brand-header"><a href="index.php" class="brand-link"><img src="images/eduschedx-logo.svg" alt="" class="brand-logo"><span class="brand-name">EduSched<span>X</span></span></a></header>
+<body class="instructions-page">
+    <?= studentBrandHeader() ?>
     <main class="activity-shell">
-        <section class="activity-card compact-card">
-            <?= studentProgress('Instructions') ?>
-            <div class="screen-panel">
+        <section class="activity-card compact-card instructions-card">
+            <div class="screen-panel instructions-panel">
                 <a class="page-back" href="welcome.php" aria-label="Back to student information"><i class="bi bi-arrow-left"></i></a>
-                <div class="panel-heading"><span class="eyebrow">Instructions</span><h1>Complete the Security Checks</h1><p>Finish all five PHP challenges.</p></div>
+                <div class="panel-heading"><span class="eyebrow">Instructions</span><h1>Complete the Security Checks</h1><p>Follow each step in order before starting the activity.</p></div>
                 <ol class="instruction-list">
-                    <li><span>1</span>Review the five coding challenges.</li>
-                    <li><span>2</span>Type the PHP code, not its letter.</li>
-                    <li><span>3</span>Run each challenge, then submit.</li>
+                    <li><span class="instruction-number">1</span><i class="bi bi-hand-index-thumb" aria-hidden="true"></i><div><strong>Security Match</strong><p>Complete the drag-and-match security task.</p></div></li>
+                    <li><span class="instruction-number">2</span><i class="bi bi-code-square" aria-hidden="true"></i><div><strong>PHP Coding</strong><p>Type the missing PHP code.</p></div></li>
+                    <li><span class="instruction-number">3</span><i class="bi bi-shield-exclamation" aria-hidden="true"></i><div><strong>Security Alert Simulator</strong><p>Generate and check the final security alert interface.</p></div></li>
+                    <li><span class="instruction-number">4</span><i class="bi bi-bullseye" aria-hidden="true"></i><div><strong>Goal</strong><p>Apply secure access-control rules correctly.</p></div></li>
                 </ol>
-                <div class="goal-box"><i class="bi bi-bullseye"></i><div><strong>Goal</strong><p>Apply secure access-control rules.</p></div></div>
-                <a class="btn btn-eduschedx btn-label-centered icon-end w-100" href="activity.php"><span>Start Activity</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                <a class="btn btn-eduschedx btn-label-centered icon-end w-100" href="levels.php"><span>Start Activity</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
             </div>
         </section>
     </main>

@@ -11,7 +11,7 @@ $pdo = database();
 if ($search !== '') {
     $statement = $pdo->prepare(
         'SELECT * FROM activity_submissions
-         WHERE student_name LIKE :search OR student_id LIKE :search OR station LIKE :search OR feedback LIKE :search
+         WHERE student_name LIKE :search OR student_id LIKE :search OR station LIKE :search
          ORDER BY submitted_at DESC'
     );
     $statement->execute(['search' => '%' . $search . '%']);
@@ -42,7 +42,7 @@ $lowest = $pdo->query('SELECT score, total FROM activity_submissions ORDER BY sc
         <?php if ($success !== ''): ?><div class="alert alert-success admin-alert" role="status" data-auto-dismiss="60000"><i class="bi bi-check-circle"></i><?= adminEscape($success) ?></div><?php endif; ?>
         <section class="summary-grid">
             <div><span>Total Submitted</span><strong><?= (int) $summary['total_submitted'] ?></strong></div>
-            <div><span>Average Score</span><strong><?= $summary['average_score'] === null ? '—' : number_format((float) $summary['average_score'], 1) ?></strong></div>
+            <div><span>Average Score</span><strong><?= $summary['average_score'] === null ? '—' : number_format((float) $summary['average_score'], 1) . '/15' ?></strong></div>
             <div><span>Highest Score</span><strong><?= !$highest ? '—' : (int) $highest['score'] . '/' . (int) $highest['total'] ?></strong></div>
             <div><span>Lowest Score</span><strong><?= !$lowest ? '—' : (int) $lowest['score'] . '/' . (int) $lowest['total'] ?></strong></div>
         </section>
@@ -50,18 +50,20 @@ $lowest = $pdo->query('SELECT score, total FROM activity_submissions ORDER BY sc
             <form class="search-form" method="get"><i class="bi bi-search"></i><input class="form-control" name="search" value="<?= adminEscape($search) ?>" placeholder="Search student, ID, or station"><button class="btn btn-eduschedx" type="submit">Search</button></form>
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
-                    <thead><tr><th>Student</th><th>Student ID</th><th>Station</th><th>IP Address</th><th>Score</th><th>Feedback / Comments</th><th>Submitted</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Student</th><th>Student ID</th><th>Station</th><th>IP Address</th><th>Part I</th><th>Part II</th><th>Part III</th><th>Overall</th><th>Submitted</th><th>Action</th></tr></thead>
                     <tbody>
                     <?php if ($submissions === []): ?>
-                        <tr><td colspan="8" class="text-center text-muted py-4">No submissions found.</td></tr>
+                        <tr><td colspan="10" class="text-center text-muted py-4">No submissions found.</td></tr>
                     <?php else: foreach ($submissions as $submission): ?>
                         <tr>
                             <td><?= adminEscape($submission['student_name']) ?></td>
                             <td><?= adminEscape((string) ($submission['student_id'] ?? '')) ?></td>
                             <td><?= adminEscape($submission['station']) ?></td>
                             <td><?= adminEscape(formatClientIp($submission['ip_address'] ?? null)) ?></td>
-                            <td><strong><?= (int) $submission['score'] ?>/<?= (int) $submission['total'] ?></strong></td>
-                            <td class="feedback-cell"><?= !empty($submission['feedback']) ? adminEscape((string) $submission['feedback']) : '&mdash;' ?></td>
+                            <td><strong><?= (int) ($submission['part1_score'] ?? 0) ?>/5</strong></td>
+                            <td><strong><?= (int) ($submission['part2_score'] ?? 0) ?>/5</strong></td>
+                            <td><strong><?= (int) ($submission['part3_score'] ?? 0) ?>/5</strong></td>
+                            <td><strong><?= (int) $submission['score'] ?>/15</strong></td>
                             <td><?= adminEscape(formatSubmissionTime((string) $submission['submitted_at'])) ?></td>
                             <td><div class="table-actions">
                                 <a class="btn btn-sm btn-outline-success" href="result.php?id=<?= (int) $submission['id'] ?>"><i class="bi bi-eye"></i> View</a>

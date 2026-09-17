@@ -2,6 +2,11 @@
 require __DIR__ . '/config.php';
 requireOpenActivity();
 
+$tabToken = (string) ($_GET['tab_token'] ?? '');
+$expectedTabToken = (string) ($_SESSION['tab_bootstrap_token'] ?? '');
+$authorizeThisTab = $tabToken !== '' && $expectedTabToken !== '' && hash_equals($expectedTabToken, $tabToken);
+if ($authorizeThisTab) unset($_SESSION['tab_bootstrap_token']);
+
 $fullName = (string) $_SESSION['full_name'];
 $firstName = explode(' ', trim($fullName))[0] ?? $fullName;
 ?>
@@ -13,13 +18,14 @@ $firstName = explode(' ', trim($fullName))[0] ?? $fullName;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
+    <?php if ($authorizeThisTab): ?><script>sessionStorage.setItem('eduschedx_tab_authenticated', '1'); history.replaceState(null, '', 'welcome.php');</script><?php endif; ?>
 </head>
-<body>
-    <header class="brand-header"><a href="index.php" class="brand-link"><img src="images/eduschedx-logo.svg" alt="" class="brand-logo"><span class="brand-name">EduSched<span>X</span></span></a></header>
+<body class="welcome-page">
+    <?= studentBrandHeader() ?>
     <main class="activity-shell">
-        <section class="activity-card compact-card">
-            <?= studentProgress('Student Info') ?>
+        <section class="activity-card compact-card welcome-card">
             <div class="screen-panel submission-received welcome-panel">
+                <a class="welcome-back" href="login.php" aria-label="Back to login"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
                 <div class="submission-icon"><i class="bi bi-person-check" aria-hidden="true"></i></div>
                 <span class="eyebrow">Identity Verified</span>
                 <h1>Welcome, <?= escape($firstName) ?></h1>

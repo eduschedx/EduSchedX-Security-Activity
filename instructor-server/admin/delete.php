@@ -28,6 +28,8 @@ if ($submissionKey === false) {
 
 $release = $pdo->prepare('DELETE FROM submission_unique_keys WHERE submission_id = :submission_id');
 $release->execute(['submission_id' => $submissionKey]);
+$deletePartRecords = $pdo->prepare('DELETE FROM activity_part_records WHERE submission_id = :submission_id');
+$deletePartRecords->execute(['submission_id' => $submissionKey]);
 $statement = $pdo->prepare('DELETE FROM activity_submissions WHERE id = :id');
 $statement->execute(['id' => $submissionId]);
 $pdo->commit();
