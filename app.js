@@ -72,6 +72,7 @@ document.querySelectorAll('[data-auto-dialog]').forEach((dialog) => {
 
 const partThreeDialog = document.querySelector('[data-part-three-dialog]');
 document.querySelector('[data-part-three-open]')?.addEventListener('click', () => partThreeDialog?.showModal());
+document.querySelector('[data-part-three-close]')?.addEventListener('click', () => partThreeDialog?.close());
 
 const partThreeTimer = document.querySelector('[data-part-three-timer]');
 const partThreeTimeoutForm = document.querySelector('[data-part-three-timeout]');

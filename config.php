@@ -219,7 +219,7 @@ function partThreeDeadline(): int
     $savedDeadline = (int) ($statement->fetchColumn() ?: 0);
 
     if ($savedDeadline <= 0) {
-        $savedDeadline = time() + 60;
+        $savedDeadline = time() + 90;
         $statement = database()->prepare(
             'INSERT INTO student_activity_runtime (student_id, part3_deadline, updated_at)
              VALUES (:student_id, :deadline, :updated_at)

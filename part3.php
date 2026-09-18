@@ -25,10 +25,11 @@ unset($_SESSION['part_three_error']);
 <body class="incident-page alert-simulator-page <?= $showThankYou ? 'part-three-submitted' : '' ?>"><?= studentBrandHeader() ?><main class="incident-shell alert-simulator-shell">
 <a class="incident-back" href="levels.php" aria-label="Back to levels"><i class="bi bi-arrow-left"></i></a>
 <header class="sim-heading"><span class="eyebrow">Final Practical Activity</span><h1>Security Alert Simulator</h1><p>Complete the PHP condition and generate the correct EduSchedX security response.</p></header>
+<p class="activity-instruction part-three-instruction"><i class="bi bi-terminal" aria-hidden="true"></i><span><strong>How to answer:</strong> Complete the missing PHP condition, then select Run Security Check. You have two attempts.</span></p>
 
 <div class="sim-layout">
 <div class="sim-left">
-<section class="sim-card sim-scenario"><div class="sim-card-title"><span>Scenario</span><strong>Suspicious Faculty Login</strong></div><dl><div><dt>User Type</dt><dd>Faculty Account</dd></div><div><dt>Failed Login Attempts</dt><dd>5</dd></div><div><dt>Time Remaining</dt><dd class="sim-countdown" <?php if (!$locked): ?>data-part-three-timer data-deadline="<?= $deadline ?>"<?php endif; ?>><?= $locked ? '00:00' : '01:00' ?></dd></div></dl><?php if (!$locked): ?><form action="incident-timeout.php" method="post" data-part-three-timeout><input type="hidden" name="csrf_token" value="<?= escape(csrfToken()) ?>"></form><?php endif; ?></section>
+<section class="sim-card sim-scenario"><div class="sim-card-title"><span>Scenario</span><strong>Suspicious Faculty Login</strong></div><dl><div><dt>User Type</dt><dd>Faculty Account</dd></div><div><dt>Failed Login Attempts</dt><dd>5</dd></div><div><dt>Time Remaining</dt><dd class="sim-countdown" <?php if (!$locked): ?>data-part-three-timer data-deadline="<?= $deadline ?>"<?php endif; ?>><?= $locked ? '00:00' : '01:30' ?></dd></div></dl><?php if (!$locked): ?><form action="incident-timeout.php" method="post" data-part-three-timeout><input type="hidden" name="csrf_token" value="<?= escape(csrfToken()) ?>"></form><?php endif; ?></section>
 
 <section class="sim-card sim-code-card"><div class="sim-card-title"><span>PHP Coding Area</span><strong>Complete the PHP Code</strong></div>
 <form action="incident-submit.php" method="post" data-security-simulator><input type="hidden" name="csrf_token" value="<?= escape(csrfToken()) ?>">
@@ -36,7 +37,7 @@ unset($_SESSION['part_three_error']);
 <p class="sim-tip"><i class="bi bi-lightbulb"></i> Type only the missing PHP condition. Copy and paste are disabled.</p>
 <?php if ($error !== ''): ?><div class="alert alert-warning sim-error" role="alert"><?= escape($error) ?></div><?php endif; ?>
 <div class="sim-code-actions"><button class="btn sim-reset" type="button" data-simulator-reset <?= $locked ? 'disabled' : '' ?>><i class="bi bi-arrow-counterclockwise"></i> Reset Code</button><button class="btn sim-run" type="submit" data-simulator-run <?= $locked ? 'disabled' : '' ?>><i class="bi bi-play-circle"></i> Run Security Check</button></div>
-<p class="sim-attempts <?= $attemptsRemaining === 0 ? 'is-empty' : '' ?>"><?= $attemptsRemaining ?> of 2 attempts remaining</p>
+<p class="sim-attempts <?= $attemptsRemaining === 0 ? 'is-empty' : ($attemptsRemaining === 1 ? 'is-warning' : '') ?>"><i class="bi bi-arrow-repeat" aria-hidden="true"></i><strong><?= $attemptsRemaining ?></strong> of 2 attempts remaining</p>
 </form></section>
 </div>
 
@@ -52,6 +53,7 @@ unset($_SESSION['part_three_error']);
 
 <?php if ($readyToSubmit): ?>
 <dialog class="submit-dialog part-three-dialog" data-part-three-dialog aria-labelledby="part-three-complete-title">
+    <button class="part-three-dialog-close" type="button" data-part-three-close aria-label="Close and review result">&times;</button>
     <div class="part-three-dialog-icon"><i class="bi bi-trophy-fill" aria-hidden="true"></i></div>
     <span class="eyebrow">Part 3 Complete</span>
     <h2 id="part-three-complete-title">Congratulations!</h2>

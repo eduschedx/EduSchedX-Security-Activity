@@ -33,6 +33,7 @@ $answers = $_SESSION['answer_draft'] ?? array_fill_keys(array_keys($challenges),
 $challengeResults = $_SESSION['challenge_result'] ?? [];
 $challengeErrors = $_SESSION['challenge_error'] ?? [];
 $attemptsUsed = (int) ($_SESSION['challenge_attempts'][$challengeId] ?? 0);
+$partTwoAttemptsRemaining = max(0, 2 - $attemptsUsed);
 $unlockQuestions = securityUnlockDefinitions();
 $partOneStep = max(1, min(5, (int) ($_SESSION['security_part_step'] ?? 1)));
 $partOneOrder = studentShuffledOrder(array_keys($unlockQuestions), 'part1');
@@ -40,6 +41,7 @@ $partOneQuestionId = (int) $partOneOrder[$partOneStep - 1];
 $unlock = $unlockQuestions[$partOneQuestionId];
 $unlockDraft = (array) ($_SESSION['security_unlock_draft'][$partOneQuestionId] ?? []);
 $unlockAttemptsUsed = (int) ($_SESSION['security_unlock_attempts'][$partOneQuestionId] ?? 0);
+$partOneAttemptsRemaining = max(0, 2 - $unlockAttemptsUsed);
 $unlockLocked = !empty($_SESSION['security_unlock_result'][$partOneQuestionId]) || $unlockAttemptsUsed >= 2;
 if (!isset($_SESSION['security_card_order'][$partOneQuestionId])) {
     $_SESSION['security_card_order'][$partOneQuestionId] = array_keys($unlock['cards']);
@@ -75,6 +77,7 @@ if (!empty($unlock['ordered'])) usort($cardOrder, static fn (string $a, string $
                     <dialog class="submit-dialog" data-part-one-dialog aria-labelledby="part-one-dialog-title"><div class="submit-dialog-head"><h2 id="part-one-dialog-title">Submit Part 1?</h2><button type="button" class="submit-dialog-close" data-part-one-cancel aria-label="Close">&times;</button></div><p>Are you sure you want to submit your final matching answers? You can only submit Part 1 once.</p><div class="submit-dialog-actions"><button type="button" class="btn btn-light" data-part-one-cancel>Cancel</button><button type="button" class="btn btn-eduschedx" data-part-one-confirm><i class="bi bi-send me-1"></i> Yes, Submit</button></div></dialog>
                     <?php else: ?>
                     <div class="panel-heading activity-intro-card"><span class="eyebrow">Part 1 · Security Matching · Question <?= $partOneStep ?> of 5</span><h1><?= escape($unlock['title']) ?></h1><p><?= escape($unlock['description']) ?></p></div>
+                    <p class="activity-instruction"><i class="bi bi-hand-index-thumb" aria-hidden="true"></i><span><strong>How to answer:</strong> Drag or tap each card into the correct matching area, then select Check Answer.</span></p>
                     <section class="part-one-workspace" id="security-unlock" data-activity-page>
                         <form action="grader.php" method="post" class="unlock-form <?= $unlockLocked ? 'is-locked' : '' ?>" data-unlock-form data-ordered="<?= !empty($unlock['ordered']) ? 'true' : 'false' ?>" data-locked="<?= $unlockLocked ? 'true' : 'false' ?>">
                             <input type="hidden" name="csrf_token" value="<?= escape(csrfToken()) ?>"><input type="hidden" name="mode" value="unlock_part"><input type="hidden" name="challenge_id" value="1">
@@ -100,7 +103,7 @@ if (!empty($unlock['ordered'])) usort($cardOrder, static fn (string $a, string $
                                 <p><i class="bi <?= $unlockPassed ? 'bi-check-circle-fill' : 'bi-x-circle-fill' ?>"></i> <?= $unlockPassed ? 'Your matching answer is correct.' : 'Your matching answer does not match the security rule.' ?></p>
                             </div>
                             <?php endif; ?>
-                            <p class="attempt-count unlock-attempt-count"><?= max(0, 2 - $unlockAttemptsUsed) ?> of 2 attempts remaining</p>
+                            <p class="attempt-count unlock-attempt-count <?= $partOneAttemptsRemaining === 0 ? 'is-empty' : ($partOneAttemptsRemaining === 1 ? 'is-warning' : '') ?>"><i class="bi bi-arrow-repeat" aria-hidden="true"></i><strong><?= $partOneAttemptsRemaining ?></strong> of 2 attempts remaining</p>
                             <?php if (empty($_SESSION['security_unlock_result'][$partOneQuestionId]) && $unlockAttemptsUsed < 2): ?><button class="btn btn-eduschedx check-drag-button" type="submit" data-check-unlock><i class="bi bi-check2-circle"></i> Check Answer</button><?php endif; ?>
                         </form>
                         <?php if (!empty($_SESSION['security_unlock_result'][$partOneQuestionId]) || $unlockAttemptsUsed >= 2): ?>
@@ -124,6 +127,7 @@ if (!empty($unlock['ordered'])) usort($cardOrder, static fn (string $a, string $
                     <dialog class="submit-dialog" data-submit-dialog aria-labelledby="submit-dialog-title"><div class="submit-dialog-head"><h2 id="submit-dialog-title">Submit Part 2?</h2><button type="button" class="submit-dialog-close" data-submit-cancel aria-label="Close">&times;</button></div><p>Are you sure you want to submit your final coding answers? Your Part 2 score will be recorded.</p><div class="submit-dialog-actions"><button type="button" class="btn btn-light" data-submit-cancel>Cancel</button><button type="button" class="btn btn-eduschedx" data-submit-confirm><i class="bi bi-send me-1"></i> Yes, Submit</button></div></dialog>
                     <?php else: ?>
                     <div class="panel-heading activity-intro-card"><span class="eyebrow">Part 2 of 2 · Coding Challenges</span><h1>Complete the PHP Checks</h1><p>Type the missing PHP code. You have two attempts per challenge.</p></div>
+                    <p class="activity-instruction"><i class="bi bi-code-square" aria-hidden="true"></i><span><strong>How to answer:</strong> Choose the correct code from the choices below, type it in the PHP blank, then select Run Code.</span></p>
                     <?php if (!empty($_SESSION['submit_error'])): ?><div class="alert alert-warning py-2"><?= escape($_SESSION['submit_error']) ?></div><?php unset($_SESSION['submit_error']); endif; ?>
                     <article class="challenge-card" id="challenge-<?= $challengeId ?>" data-activity-page>
                         <div class="challenge-intro-card">
@@ -148,7 +152,7 @@ if (!empty($unlock['ordered'])) usort($cardOrder, static fn (string $a, string $
                                 <div class="code-entry-card">
                                     <div class="code-choices" data-no-copy aria-label="Code references"><p class="choice-heading">Type the missing PHP condition using these references</p><?php foreach ($challenge['choices'] as $choiceIndex => $choice): $letter = chr(65 + $choiceIndex); ?><div class="code-choice"><strong><?= $letter ?>.</strong><code><?= escape($choice) ?></code></div><?php endforeach; ?></div>
                                     <label class="visually-hidden" for="answer_<?= $challengeId ?>">Type the Missing PHP Code</label>
-                                    <p class="attempt-count"><?= max(0, 2 - $attemptsUsed) ?> of 2 attempts remaining</p>
+                                    <p class="attempt-count <?= $partTwoAttemptsRemaining === 0 ? 'is-empty' : ($partTwoAttemptsRemaining === 1 ? 'is-warning' : '') ?>"><i class="bi bi-arrow-repeat" aria-hidden="true"></i><strong><?= $partTwoAttemptsRemaining ?></strong> of 2 attempts remaining</p>
                                 </div>
                                 <?php if (isset($challengeErrors[$challengeId])): ?><div class="alert alert-danger challenge-feedback" role="alert"><?= escape((string) $challengeErrors[$challengeId]) ?></div>
                                 <?php elseif (isset($challengeResults[$challengeId])): $preview = $challengeResults[$challengeId]; ?><div class="challenge-result <?= $preview['matches'] ? 'is-match' : 'is-mismatch' ?>" role="status"><span>Actual Result</span><strong><?= escape((string) $preview['actual']) ?></strong><p><i class="bi <?= $preview['matches'] ? 'bi-check-circle-fill' : 'bi-x-circle-fill' ?>"></i> <?= $preview['matches'] ? 'Matches Expected Result' : 'Does Not Match Expected Result' ?></p></div><?php endif; ?>

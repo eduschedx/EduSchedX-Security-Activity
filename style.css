@@ -801,6 +801,7 @@ border-color: #8e3030;
 }
 .part-three-submitted .alert-simulator-shell > .incident-back,
 .part-three-submitted .alert-simulator-shell > .sim-heading,
+.part-three-submitted .alert-simulator-shell > .part-three-instruction,
 .part-three-submitted .alert-simulator-shell > .sim-layout { display: none; }
 .part-three-submitted .alert-simulator-shell { min-height: 100vh; padding: 0; }
 .incident-shell { width: min(1120px, calc(100% - 2rem)); margin: 0 auto; padding: 5.5rem 0 3rem; }
@@ -913,8 +914,11 @@ border-color: #8e3030;
 .sim-run { border: 1px solid #087756; background: #07865f; color: #fff; box-shadow: 0 10px 22px rgba(0,90,64,.23); }
 .sim-run:hover { background: #056f4e; color: #fff; }
 .sim-run:disabled, .sim-reset:disabled { opacity: .55; cursor: not-allowed; }
-.sim-attempts { margin: .7rem 0 0; color: #52665c; font-size: .72rem; text-align: center; }
-.sim-attempts.is-empty { color: #a23838; font-weight: 800; }
+.sim-attempts { display: flex; align-items: center; justify-content: center; gap: .38rem; margin: .8rem 0 0; padding: .65rem .8rem; border: 1px solid rgba(8, 127, 89, .28); border-radius: .65rem; background: rgba(222, 243, 232, .88); color: #075f42; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7); font-size: .78rem; font-weight: 720; text-align: center; }
+.sim-attempts i { font-size: .9rem; }
+.sim-attempts strong { font-size: 1rem; font-weight: 900; }
+.sim-attempts.is-warning { border-color: rgba(193, 139, 8, .4); background: rgba(255, 241, 194, .92); color: #805c00; }
+.sim-attempts.is-empty { border-color: rgba(178, 55, 55, .36); background: rgba(250, 222, 218, .92); color: #a23838; font-weight: 800; }
 .security-alert-card { padding: 1rem; border-radius: .8rem; }
 .security-alert-card.is-critical { border: 1px solid rgba(187,55,55,.58); background: linear-gradient(145deg,#5b171b,#2e1013); color: #fff3f1; box-shadow: 0 12px 28px rgba(89,20,24,.28); }
 .security-alert-card.is-normal { border: 1px solid rgba(39,137,99,.35); background: #e5f3eb; color: #124735; }
@@ -953,7 +957,9 @@ border-color: #8e3030;
 .sim-final-result span { color: #53675d; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
 .sim-final-result strong { grid-row: 1 / span 2; grid-column: 2; color: #074a36; font-size: 1.4rem; }
 .sim-final-result .btn { grid-column: 1; width: min(100%, 260px); margin-top: .35rem; }
-.submit-dialog.part-three-dialog { width: min(calc(100% - 2rem), 620px); padding: clamp(2rem, 5vw, 3.25rem); border: 2px solid rgba(8,127,89,.58); border-radius: 1.25rem; background: rgba(247,244,229,.97); text-align: center; }
+.submit-dialog.part-three-dialog { position: relative; width: min(calc(100% - 2rem), 620px); padding: clamp(2rem, 5vw, 3.25rem); border: 2px solid rgba(8,127,89,.58); border-radius: 1.25rem; background: rgba(247,244,229,.97); text-align: center; }
+.part-three-dialog-close { position: absolute; top: .8rem; right: .9rem; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: rgba(6, 60, 41, .08); color: #53675d; font-size: 1.45rem; line-height: 1; cursor: pointer; }
+.part-three-dialog-close:hover, .part-three-dialog-close:focus-visible { background: rgba(6, 60, 41, .16); color: var(--deep-green); outline: none; }
 .submit-dialog.thank-you-dialog::backdrop { background: rgba(0, 24, 15, .46); backdrop-filter: none; -webkit-backdrop-filter: none; }
 .part-three-dialog .part-three-dialog-icon { display: grid; width: 3.5rem; height: 3.5rem; margin: 0 auto .8rem; place-items: center; border-radius: 50%; background: #078b65; color: #fff; font-size: 1.45rem; box-shadow: 0 10px 24px rgba(7,139,101,.24); }
 .part-three-dialog .part-three-dialog-icon.is-heart { background: #d95d72; box-shadow: 0 10px 24px rgba(217,93,114,.24); font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; font-size: 1.7rem; }
@@ -1429,7 +1435,11 @@ code {
 .challenge-scenario .expected-label { align-self: center; color: var(--deep-green); font-weight: 800; }
 .challenge-scenario .expected-value { width: fit-content; display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .5rem; border-radius: .35rem; background: rgba(8, 127, 89, .13); color: #086442; font-size: .75rem; letter-spacing: .02em; }
 .challenge-run-form { display: grid; gap: .65rem; }
-.attempt-count { margin: 0; color: var(--muted); font-size: .74rem; }
+.attempt-count { display: flex; align-items: center; justify-content: center; gap: .38rem; margin: 0; padding: .65rem .8rem; border: 1px solid rgba(8, 127, 89, .28); border-radius: .65rem; background: rgba(222, 243, 232, .88); color: #075f42; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7); font-size: .78rem; font-weight: 720; text-align: center; }
+.attempt-count i { font-size: .9rem; }
+.attempt-count strong { font-size: 1rem; font-weight: 900; }
+.attempt-count.is-warning { border-color: rgba(193, 139, 8, .4); background: rgba(255, 241, 194, .92); color: #805c00; }
+.attempt-count.is-empty { border-color: rgba(178, 55, 55, .36); background: rgba(250, 222, 218, .92); color: #a23838; font-weight: 800; }
 .btn-run-code {
     min-height: 44px;
     border: 1px solid #d3a719;
@@ -1550,7 +1560,7 @@ code {
 .activity-page .severity-target.severity-info { border-color: rgba(45,130,186,.42); background: rgba(224,239,248,.78); }
 .activity-page .severity-target.severity-warning { border-color: rgba(202,145,20,.5); background: rgba(250,241,207,.82); }
 .activity-page .severity-target.severity-critical { border-color: rgba(179,72,72,.4); background: rgba(248,226,222,.8); }
-.activity-page .unlock-attempt-count { justify-self: center; padding: .35rem .7rem; border-radius: 2rem; background: rgba(247, 244, 229, .78); color: #405b50; }
+.activity-page .unlock-attempt-count { justify-self: center; width: min(100%, 330px); }
 .activity-page .check-drag-button {
     width: 100%;
     min-height: 52px;
@@ -1645,6 +1655,10 @@ code {
 .activity-page .challenge-result,
 .activity-page .challenge-feedback { margin: 0; padding: .9rem 1rem; }
 .activity-page .challenge-result.is-match { border-color: rgba(19, 150, 99, .28); background: rgba(220, 243, 231, .9); }
+.activity-instruction { display: flex; align-items: flex-start; gap: .55rem; margin: 0 0 1rem; padding: .72rem .85rem; border: 1px solid rgba(8, 127, 89, .22); border-radius: .65rem; background: rgba(239, 248, 241, .92); color: #315d4c; font-size: .78rem; line-height: 1.5; }
+.activity-instruction i { flex: 0 0 auto; margin-top: .08rem; color: var(--forest-green); font-size: .95rem; }
+.activity-instruction strong { color: var(--deep-green); }
+.part-three-instruction { width: 100%; margin: 0 0 1rem; background: rgba(247, 244, 229, .94); box-shadow: 0 8px 22px rgba(0, 28, 20, .15); }
 .activity-page .challenge-result.is-mismatch,
 .activity-page .challenge-feedback.alert-danger { border-color: rgba(193, 55, 55, .25); background: rgba(248, 226, 222, .9); }
 .activity-page .challenge-run-form > .btn,
